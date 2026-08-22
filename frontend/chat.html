@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat — MissVoice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --border-color: #334155;
+            --accent: #38BDF8;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+        }
+
+        aside {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo i { color: var(--accent); }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-header {
+            padding: 1.25rem 2rem;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .msg-bubble {
+            max-width: 60%;
+            padding: 0.85rem 1.25rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .msg-out {
+            align-self: flex-end;
+            background: var(--accent);
+            color: #0F172A;
+            font-weight: 500;
+        }
+
+        .msg-in {
+            align-self: flex-start;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .chat-input-bar {
+            padding: 1.25rem 2rem;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input-bar input {
+            flex: 1;
+            background: #0F172A;
+            border: 1px solid var(--border-color);
+            padding: 0.85rem 1.25rem;
+            border-radius: 10px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .btn-send {
+            background: var(--accent);
+            color: #0F172A;
+            border: none;
+            padding: 0 1.5rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <a href="dashboard.html" class="logo"><i class="fa-solid fa-hands-asl-interpreting"></i> MISSVOICE</a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html"><i class="fa-solid fa-table-columns"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="search.html"><i class="fa-solid fa-magnifying-glass"></i> Search User</a></li>
+            <li class="nav-item"><a href="connection.html"><i class="fa-solid fa-user-group"></i> Connections</a></li>
+            <li class="nav-item active"><a href="chat.html"><i class="fa-solid fa-comments"></i> Messages</a></li>
+            <li class="nav-item"><a href="translate.html"><i class="fa-solid fa-hands"></i> Test AI Sign</a></li>
+            <li class="nav-item"><a href="setting.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+    </aside>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div>
+                <h3 id="peerTitle">Peer Chat</h3>
+                <span id="peerSubtitle" style="color: var(--accent); font-size: 0.85rem;">@peer_id</span>
+            </div>
+            <a href="#" id="callBtn" class="btn-send" style="text-decoration: none; padding: 0.6rem 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-video"></i> Video Call
+            </a>
+        </div>
+
+        <div class="chat-messages" id="messagesBox">
+            <div class="msg-bubble msg-in">Hello! We can start a video call or chat here.</div>
+        </div>
+
+        <div class="chat-input-bar">
+            <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="handleEnter(event)">
+            <button class="btn-send" onclick="sendMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const myId = localStorage.getItem('missvoice_id');
+        const urlParams = new URLSearchParams(window.location.search);
+        const peerId = urlParams.get('peer') || '@priya_9135';
+
+        if (!myId) window.location.href = 'login.html';
+
+        document.getElementById('peerTitle').innerText = peerId;
+        document.getElementById('peerSubtitle').innerText = peerId;
+        document.getElementById('callBtn').href = `videocall.html?peer=${encodeURIComponent(peerId)}`;
+
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/${encodeURIComponent(myId)}`);
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'chat-msg' && data.sender === peerId) {
+                    appendMsg(data.text, 'in');
+                }
+            } catch (err) {
+                console.error("Chat WS error:", err);
+            }
+        };
+
+        function sendMsg() {
+            const input = document.getElementById('chatInput');
+            const txt = input.value.trim();
+            if (!txt || ws.readyState !== WebSocket.OPEN) return;
+
+            appendMsg(txt, 'out');
+            ws.send(JSON.stringify({ type: 'chat-msg', target: peerId, sender: myId, text: txt }));
+            input.value = '';
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') sendMsg(); }
+
+        function appendMsg(text, direction) {
+            const box = document.getElementById('messagesBox');
+            const div = document.createElement('div');
+            div.className = `msg-bubble msg-${direction}`;
+            div.innerText = text;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
+</body>
+</html>

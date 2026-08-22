@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — MissVoice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --border-color: #334155;
+            --accent: #38BDF8;
+            --accent-glow: rgba(56, 189, 248, 0.25);
+            --success: #10B981;
+            --danger: #EF4444;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        aside {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo i { color: var(--accent); }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+        }
+
+        .user-pill {
+            background: #0F172A;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .user-info .name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-info .tag {
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+
+        main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            position: relative;
+            width: 320px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            border-radius: 10px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card h2 i { color: var(--accent); }
+
+        .connection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .connection-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem;
+            background: #0F172A;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .conn-user {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-call {
+            background: var(--accent);
+            color: #0F172A;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-decoration: none;
+        }
+
+        .btn-call:hover { background: #7DD3FC; }
+
+        .btn-chat {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-right: 0.4rem;
+        }
+
+        .quick-call-card {
+            background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(15,23,42,0.6));
+            border: 1px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quick-call-card input {
+            background: #0F172A;
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        /* Incoming Call Notification Modal */
+        .call-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .call-modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(56, 189, 248, 0.4); }
+        }
+
+        .call-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+        .btn-accept {
+            background: var(--success);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-decline {
+            background: var(--danger);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <a href="dashboard.html" class="logo">
+            <i class="fa-solid fa-hands-asl-interpreting"></i> MISSVOICE
+        </a>
+        <ul class="nav-menu">
+            <li class="nav-item active"><a href="dashboard.html"><i class="fa-solid fa-table-columns"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="search.html"><i class="fa-solid fa-magnifying-glass"></i> Search User</a></li>
+            <li class="nav-item"><a href="connection.html"><i class="fa-solid fa-user-group"></i> Connections</a></li>
+            <li class="nav-item"><a href="chat.html"><i class="fa-solid fa-comments"></i> Messages</a></li>
+            <li class="nav-item"><a href="translate.html"><i class="fa-solid fa-hands"></i> Test AI Sign</a></li>
+            <li class="nav-item"><a href="setting.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+        <div class="user-pill">
+            <div class="avatar" id="userAvatar">U</div>
+            <div class="user-info">
+                <div class="name" id="userName">Loading...</div>
+                <div class="tag" id="userTag">@id</div>
+            </div>
+            <a href="#" onclick="logout()" style="color: var(--text-muted);"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+        </div>
+    </aside>
+
+    <main>
+        <div class="header-bar">
+            <div>
+                <h1>Welcome Back!</h1>
+                <p style="color: var(--text-muted);">Start an accessible sign-language video call anytime.</p>
+            </div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Search @missvoice_id..." onkeydown="handleSearch(event)">
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2><i class="fa-solid fa-user-group"></i> Active Connections</h2>
+                <div class="connection-list" id="connList">
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Loading connections...</p>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="card quick-call-card">
+                    <h2><i class="fa-solid fa-video"></i> Direct Call</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Start a call immediately by entering a MissVoice ID:</p>
+                    <input type="text" id="directCallId" placeholder="e.g. @priya_9135">
+                    <button class="btn-call" onclick="startDirectCall()"><i class="fa-solid fa-phone"></i> Call Now</button>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fa-solid fa-shield-halved"></i> Privacy Status</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">
+                        <i class="fa-solid fa-circle-check" style="color: var(--success);"></i> No phone number linked.<br>
+                        <i class="fa-solid fa-circle-check" style="color: var(--success);"></i> Sign processing dormant until SIGN button is ON.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Incoming Call Alert Modal -->
+    <div class="call-modal" id="incomingCallModal">
+        <div class="call-modal-content">
+            <i class="fa-solid fa-video" style="font-size: 3rem; color: var(--accent);"></i>
+            <h2 style="margin-top: 1rem;">Incoming MissVoice Call</h2>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;" id="callerName">@caller is calling you...</p>
+            <div class="call-actions">
+                <button class="btn-accept" id="acceptCallBtn"><i class="fa-solid fa-phone"></i> Accept</button>
+                <button class="btn-decline" onclick="declineCall()"><i class="fa-solid fa-phone-slash"></i> Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const myId = localStorage.getItem('missvoice_id');
+        const myName = localStorage.getItem('name');
+
+        if (!myId) window.location.href = 'login.html';
+
+        document.getElementById('userName').innerText = myName || 'User';
+        document.getElementById('userTag').innerText = myId;
+        document.getElementById('userAvatar').innerText = (myName || 'U')[0].toUpperCase();
+
+        async function loadConnections() {
+            try {
+                const res = await fetch(`/api/connections/${encodeURIComponent(myId)}`);
+                const data = await res.json();
+                const container = document.getElementById('connList');
+                if (!data.connections || data.connections.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No connections yet. Use the search to connect!</p>`;
+                    return;
+                }
+                container.innerHTML = data.connections.map(c => `
+                    <div class="connection-item">
+                        <div class="conn-user">
+                            <div class="avatar">${c.name[0].toUpperCase()}</div>
+                            <div>
+                                <div style="font-weight:600;">${c.name}</div>
+                                <div style="font-size:0.8rem; color:var(--accent);">${c.missvoice_id}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="chat.html?peer=${encodeURIComponent(c.missvoice_id)}" class="btn-chat"><i class="fa-regular fa-comment"></i></a>
+                            <a href="videocall.html?peer=${encodeURIComponent(c.missvoice_id)}" class="btn-call"><i class="fa-solid fa-video"></i> Call</a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Connections fetch error:", err);
+            }
+        }
+        loadConnections();
+
+        function handleSearch(e) {
+            if (e.key === 'Enter') {
+                window.location.href = `search.html?q=${encodeURIComponent(e.target.value)}`;
+            }
+        }
+
+        function startDirectCall() {
+            const peer = document.getElementById('directCallId').value.trim();
+            if (peer) window.location.href = `videocall.html?peer=${encodeURIComponent(peer)}`;
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        // Dynamic WebSocket listener for incoming calls
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/${encodeURIComponent(myId)}`);
+        
+        ws.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'call-user' || msg.type === 'offer') {
+                    document.getElementById('callerName').innerText = `${msg.caller || msg.sender} is calling you...`;
+                    document.getElementById('incomingCallModal').style.display = 'flex';
+                    document.getElementById('acceptCallBtn').onclick = () => {
+                        window.location.href = `videocall.html?peer=${encodeURIComponent(msg.caller || msg.sender)}&incoming=true`;
+                    };
+                }
+            } catch (err) {
+                console.error("WebSocket message error:", err);
+            }
+        };
+
+        function declineCall() {
+            document.getElementById('incomingCallModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

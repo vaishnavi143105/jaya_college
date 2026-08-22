@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — MissVoice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --border-color: #334155;
+            --accent: #38BDF8;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        aside {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo i { color: var(--accent); }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+        }
+
+        main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2.5rem;
+            max-width: 700px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .avatar-lg {
+            width: 90px;
+            height: 90px;
+            border-radius: 24px;
+            background: var(--accent);
+            color: #0F172A;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.25rem;
+        }
+
+        .id-copy-box {
+            background: #0F172A;
+            border: 1px dashed var(--accent);
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            color: var(--accent);
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <a href="dashboard.html" class="logo"><i class="fa-solid fa-hands-asl-interpreting"></i> MISSVOICE</a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html"><i class="fa-solid fa-table-columns"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="search.html"><i class="fa-solid fa-magnifying-glass"></i> Search User</a></li>
+            <li class="nav-item"><a href="connections.html"><i class="fa-solid fa-user-group"></i> Connections</a></li>
+            <li class="nav-item"><a href="chat.html"><i class="fa-solid fa-comments"></i> Messages</a></li>
+            <li class="nav-item"><a href="translate.html"><i class="fa-solid fa-hands"></i> Test AI Sign</a></li>
+            <li class="nav-item active"><a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+            <li class="nav-item"><a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <div class="card">
+            <div class="avatar-lg" id="profAvatar">U</div>
+            <h2 id="profName">User Profile</h2>
+            <div class="id-copy-box" onclick="copyId()">
+                <span id="profId">@user_0000</span>
+                <i class="fa-regular fa-copy"></i>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Click the ID above to copy and share it with peers for instant video calls.</p>
+        </div>
+    </main>
+
+    <script>
+        const myName = localStorage.getItem('name') || 'User';
+        const myId = localStorage.getItem('missvoice_id') || '@user_0000';
+
+        document.getElementById('profName').innerText = myName;
+        document.getElementById('profId').innerText = myId;
+        document.getElementById('profAvatar').innerText = myName[0].toUpperCase();
+
+        function copyId() {
+            navigator.clipboard.writeText(myId);
+            alert('MissVoice ID copied to clipboard!');
+        }
+    </script>
+</body>
+</html>

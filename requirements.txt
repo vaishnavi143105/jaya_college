@@ -1,0 +1,10 @@
+flask
+flask-cors
+flask-sock
+simple-websocket
+mysql-connector-python
+python-dotenv
+werkzeug
+numpy
+opencv-python
+pillow

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connections — MissVoice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --border-color: #334155;
+            --accent: #38BDF8;
+            --success: #10B981;
+            --danger: #EF4444;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; }
+        aside { width: 260px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 1.5rem; position: fixed; height: 100vh; }
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--text-main); text-decoration: none; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 2rem; }
+        .logo i { color: var(--accent); }
+        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+        .nav-item a { display: flex; align-items: center; gap: 0.85rem; padding: 0.8rem 1rem; color: var(--text-muted); text-decoration: none; border-radius: 10px; font-weight: 600; }
+        .nav-item.active a, .nav-item a:hover { background: rgba(56, 189, 248, 0.1); color: var(--accent); }
+        main { margin-left: 260px; flex: 1; padding: 2.5rem; max-width: 900px; }
+        .tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; }
+        .tab-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1rem; font-weight: 600; padding: 0.75rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 0.5rem; }
+        .tab-btn.active { color: var(--accent); border-color: var(--accent); }
+        .badge-count { background: var(--accent); color: var(--bg-main); font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; }
+        .list-container { display: flex; flex-direction: column; gap: 1rem; }
+        .card-item { background: var(--bg-card); border: 1px solid var(--border-color); padding: 1rem 1.5rem; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; }
+        .user-block { display: flex; align-items: center; gap: 1rem; }
+        .avatar { width: 44px; height: 44px; border-radius: 10px; background: var(--accent); color: #0F172A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; }
+        .action-group { display: flex; gap: 0.6rem; }
+        .btn-action { padding: 0.55rem 1.1rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.9rem; }
+        .btn-accept { background: var(--success); color: white; }
+        .btn-reject { background: #334155; color: var(--danger); border: 1px solid var(--border-color); }
+        .btn-msg { background: #334155; color: white; }
+        .btn-call { background: var(--accent); color: #0F172A; }
+    </style>
+</head>
+<body>
+    <aside>
+        <a href="dashboard.html" class="logo"><i class="fa-solid fa-hands-asl-interpreting"></i> MISSVOICE</a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html"><i class="fa-solid fa-table-columns"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="search.html"><i class="fa-solid fa-magnifying-glass"></i> Search User</a></li>
+            <li class="nav-item active"><a href="connection.html"><i class="fa-solid fa-user-group"></i> Connections</a></li>
+            <li class="nav-item"><a href="chat.html"><i class="fa-solid fa-comments"></i> Messages</a></li>
+            <li class="nav-item"><a href="translate.html"><i class="fa-solid fa-hands"></i> Test AI Sign</a></li>
+            <li class="nav-item"><a href="setting.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <h1 style="margin-bottom: 1.5rem;">Connections & Requests</h1>
+        <div class="tabs">
+            <button class="tab-btn active" id="tabAcceptedBtn" onclick="switchTab('accepted')">
+                <i class="fa-solid fa-users"></i> Connected Peers
+            </button>
+            <button class="tab-btn" id="tabPendingBtn" onclick="switchTab('pending')">
+                <i class="fa-solid fa-user-plus"></i> Incoming Requests <span id="pendingBadge" class="badge-count" style="display:none;">0</span>
+            </button>
+        </div>
+
+        <div class="list-container" id="listContent">
+            <p style="color: var(--text-muted);">Loading...</p>
+        </div>
+    </main>
+
+    <script>
+        const myId = localStorage.getItem('missvoice_id');
+        if (!myId) window.location.href = 'login.html';
+
+        let currentTab = 'accepted';
+        let cachedData = { connections: [], pending_requests: [] };
+
+        async function fetchConns() {
+            try {
+                const res = await fetch(`/api/connections/${encodeURIComponent(myId)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                cachedData = {
+                    connections: data.connections || [],
+                    pending_requests: data.pending_requests || data.pending || []
+                };
+
+                const badge = document.getElementById('pendingBadge');
+                const count = cachedData.pending_requests.length;
+                if (count > 0) {
+                    badge.innerText = count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                render();
+            } catch (err) {
+                console.error("Fetch error:", err);
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabAcceptedBtn').classList.toggle('active', tab === 'accepted');
+            document.getElementById('tabPendingBtn').classList.toggle('active', tab === 'pending');
+            render();
+        }
+
+        function render() {
+            const container = document.getElementById('listContent');
+
+            if (currentTab === 'accepted') {
+                if (!cachedData.connections || cachedData.connections.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:2.5rem;">No connected peers yet. Go to <strong>Search User</strong> to send requests!</p>';
+                    return;
+                }
+                container.innerHTML = cachedData.connections.map(c => `
+                    <div class="card-item">
+                        <div class="user-block">
+                            <div class="avatar">${(c.name || 'U')[0].toUpperCase()}</div>
+                            <div>
+                                <div style="font-weight:600; font-size:1.05rem;">${c.name}</div>
+                                <div style="color:var(--accent); font-size:0.85rem;">${c.missvoice_id}</div>
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            <a href="chat.html?peer=${encodeURIComponent(c.missvoice_id)}" class="btn-action btn-msg">
+                                <i class="fa-regular fa-comment"></i> Message
+                            </a>
+                            <a href="videocall.html?peer=${encodeURIComponent(c.missvoice_id)}" class="btn-action btn-call">
+                                <i class="fa-solid fa-video"></i> Video Call
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                if (!cachedData.pending_requests || cachedData.pending_requests.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:2.5rem;">No pending incoming requests.</p>';
+                    return;
+                }
+                container.innerHTML = cachedData.pending_requests.map(c => `
+                    <div class="card-item">
+                        <div class="user-block">
+                            <div class="avatar">${(c.name || 'U')[0].toUpperCase()}</div>
+                            <div>
+                                <div style="font-weight:600; font-size:1.05rem;">${c.name}</div>
+                                <div style="color:var(--accent); font-size:0.85rem;">${c.missvoice_id} wants to connect</div>
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            <button class="btn-action btn-reject" onclick="respond('${c.missvoice_id}', 'reject')">
+                                <i class="fa-solid fa-xmark"></i> Decline
+                            </button>
+                            <button class="btn-action btn-accept" onclick="respond('${c.missvoice_id}', 'accept')">
+                                <i class="fa-solid fa-check"></i> Accept
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function respond(requesterId, action) {
+            try {
+                await fetch(`/api/connections/${action}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sender_id: requesterId, 
+                        receiver_id: myId 
+                    })
+                });
+                fetchConns();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        fetchConns();
+        setInterval(fetchConns, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Translation — MissVoice</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --border-color: #334155;
+            --accent: #38BDF8;
+            --accent-glow: rgba(56, 189, 248, 0.25);
+            --success: #10B981;
+            --danger: #EF4444;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        aside {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo i { color: var(--accent); }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.8rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-item.active a, .nav-item a:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+        }
+
+        main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 2.5rem;
+            max-width: 950px;
+        }
+
+        .header { margin-bottom: 1.5rem; }
+        .header h1 { font-size: 1.8rem; font-weight: 700; }
+        .header p { color: var(--text-muted); margin-top: 0.25rem; font-size: 0.95rem; }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 460px;
+            background: #020617;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .detected-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 700;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.25rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--accent); color: #0F172A; }
+        .btn-stop { background: var(--danger); color: white; }
+        .btn-toggle { background: var(--success); color: #0F172A; }
+        .btn-toggle.inactive { background: #475569; color: white; }
+        .btn-secondary { background: #334155; color: white; }
+
+        .output-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .output-header h3 {
+            color: var(--accent);
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .sentence-box {
+            background: #0F172A;
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            min-height: 3.5rem;
+            color: #FFFFFF;
+        }
+
+        .btn-actions-row {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <aside>
+        <a href="dashboard.html" class="logo"><i class="fa-solid fa-hands-asl-interpreting"></i> MISSVOICE</a>
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="dashboard.html"><i class="fa-solid fa-table-columns"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="search.html"><i class="fa-solid fa-magnifying-glass"></i> Search User</a></li>
+            <li class="nav-item"><a href="connection.html"><i class="fa-solid fa-user-group"></i> Connections</a></li>
+            <li class="nav-item"><a href="chat.html"><i class="fa-solid fa-comments"></i> Messages</a></li>
+            <li class="nav-item active"><a href="translate.html"><i class="fa-solid fa-hands"></i> Test AI Sign</a></li>
+            <li class="nav-item"><a href="setting.html"><i class="fa-solid fa-gear"></i> Settings</a></li>
+        </ul>
+    </aside>
+
+    <main>
+        <div class="header">
+            <h1>Sign Language Translation</h1>
+            <p>Real-time SSD MobileNet sign gesture detection and voice synthesis.</p>
+        </div>
+
+        <div class="video-container">
+            <div class="detected-badge" id="detectionBadge">
+                <span>Detected Sign: <strong id="signLabel">None</strong></span>
+                <span>(<span id="confLabel">0%</span>)</span>
+            </div>
+            <video id="webcam" autoplay playsinline muted></video>
+        </div>
+
+        <div class="controls-bar">
+            <button class="btn btn-primary" id="startCamBtn" onclick="startCamera()"><i class="fa-solid fa-video"></i> Start Camera</button>
+            <button class="btn btn-stop" id="stopCamBtn" onclick="stopCamera()" style="display: none;"><i class="fa-solid fa-video-slash"></i> Stop Camera</button>
+            <button class="btn btn-toggle" id="toggleSignBtn" onclick="toggleTranslation()"><i class="fa-solid fa-hands"></i> <span id="toggleSignText">Translation ON</span></button>
+        </div>
+
+        <div class="output-card">
+            <div class="output-header">
+                <h3>Translated Text</h3>
+            </div>
+            <div class="sentence-box" id="translatedSentence">No signs translated yet...</div>
+            <div class="btn-actions-row">
+                <button class="btn btn-primary" onclick="speakText()"><i class="fa-solid fa-volume-high"></i> Speak</button>
+                <button class="btn btn-secondary" onclick="clearText()"><i class="fa-solid fa-trash"></i> Clear</button>
+            </div>
+        </div>
+    </main>
+
+    <canvas id="captureCanvas" width="640" height="480" style="display: none;"></canvas>
+
+    <script>
+        let stream = null;
+        let isTranslating = true;
+        let detectionInterval = null;
+
+        // Prediction Stabilization / Debounce State
+        let recentDetections = [];
+        const STABILITY_THRESHOLD = 3; // consecutive detections needed
+        const CONFIDENCE_MIN = 0.70;
+        let lastAddedWord = "";
+        let translatedWords = [];
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+                document.getElementById('webcam').srcObject = stream;
+                document.getElementById('startCamBtn').style.display = 'none';
+                document.getElementById('stopCamBtn').style.display = 'inline-flex';
+                startInferenceLoop();
+            } catch (err) {
+                alert('Unable to access webcam.');
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            if (detectionInterval) clearInterval(detectionInterval);
+            document.getElementById('webcam').srcObject = null;
+            document.getElementById('startCamBtn').style.display = 'inline-flex';
+            document.getElementById('stopCamBtn').style.display = 'none';
+        }
+
+        function toggleTranslation() {
+            isTranslating = !isTranslating;
+            const btn = document.getElementById('toggleSignBtn');
+            const txt = document.getElementById('toggleSignText');
+
+            if (isTranslating) {
+                btn.className = 'btn btn-toggle';
+                txt.innerText = 'Translation ON';
+            } else {
+                btn.className = 'btn btn-toggle inactive';
+                txt.innerText = 'Translation OFF';
+                document.getElementById('signLabel').innerText = 'Paused';
+                document.getElementById('confLabel').innerText = '0%';
+            }
+        }
+
+        function startInferenceLoop() {
+            const canvas = document.getElementById('captureCanvas');
+            const ctx = canvas.getContext('2d');
+            const video = document.getElementById('webcam');
+
+            detectionInterval = setInterval(async () => {
+                if (!isTranslating || !stream) return;
+
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const frameData = canvas.toDataURL('image/jpeg', 0.65);
+
+                try {
+                    const res = await fetch('/api/detect_sign', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: frameData })
+                    });
+
+                    if (!res.ok) return;
+                    const data = await res.json();
+
+                    if (data.detected_sign && data.confidence >= CONFIDENCE_MIN) {
+                        const sign = data.detected_sign.toLowerCase();
+                        const confPct = Math.round(data.confidence * 100);
+
+                        document.getElementById('signLabel').innerText = sign.toUpperCase();
+                        document.getElementById('confLabel').innerText = `${confPct}%`;
+
+                        // Debounce handling
+                        handleDebounce(sign);
+                    } else {
+                        document.getElementById('signLabel').innerText = 'Scanning...';
+                        document.getElementById('confLabel').innerText = '0%';
+                        recentDetections = [];
+                    }
+                } catch (err) {
+                    console.error('Frame inference error:', err);
+                }
+            }, 250);
+        }
+
+        function handleDebounce(detectedClass) {
+            recentDetections.push(detectedClass);
+            if (recentDetections.length > STABILITY_THRESHOLD) {
+                recentDetections.shift();
+            }
+
+            const allMatch = recentDetections.length === STABILITY_THRESHOLD &&
+                             recentDetections.every(c => c === detectedClass);
+
+            if (allMatch && detectedClass !== lastAddedWord) {
+                lastAddedWord = detectedClass;
+                const formatted = detectedClass.replace('_', ' ');
+                translatedWords.push(formatted.charAt(0).toUpperCase() + formatted.slice(1));
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            const box = document.getElementById('translatedSentence');
+            box.innerText = translatedWords.length > 0 ? translatedWords.join(' ') : 'No signs translated yet...';
+        }
+
+        function speakText() {
+            if (translatedWords.length === 0) return;
+            const utterance = new SpeechSynthesisUtterance(translatedWords.join(' '));
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function clearText() {
+            translatedWords = [];
+            lastAddedWord = "";
+            recentDetections = [];
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
